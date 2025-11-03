@@ -448,7 +448,7 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.flow_items.direction = "vertical"
         Data.GUI.flow_items = Data.GUI.frame_main.add(Data.GUI.flow_items)
         Data.GUI.flow_items.style = Prefix .. "flow_vertival_8"
-        -- Data.GUI.flow_items.visible = false
+        Data.GUI.flow_items.visible = false
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -546,7 +546,7 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.flow_confirm.direction = "horizontal"
         Data.GUI.flow_confirm = Data.GUI.flow_items.add(Data.GUI.flow_confirm)
         Data.GUI.flow_confirm.style = Prefix .. "flow_confirm"
-        -- Data.GUI.flow_confirm.visible = false
+        Data.GUI.flow_confirm.visible = false
 
         --- Botón para cancelar los cambios
         Data.GUI.button_cancel = {}
@@ -603,7 +603,7 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.flow_IO.direction = "vertical"
         Data.GUI.flow_IO = Data.GUI.frame_main.add(Data.GUI.flow_IO)
         Data.GUI.flow_IO.style = Prefix .. "flow_vertival_8"
-        -- Data.GUI.flow_IO.visible = false
+        Data.GUI.flow_IO.visible = false
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
