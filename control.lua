@@ -353,7 +353,7 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.label_title = {}
         Data.GUI.label_title.type = "label"
         Data.GUI.label_title.name = "title"
-        Data.GUI.label_title.caption = { "starting-items" }
+        Data.GUI.label_title.caption = { "description.initial-items" }
         Data.GUI.label_title = Data.GUI.flow_head.add(Data.GUI.label_title)
         Data.GUI.label_title.style = Prefix .. "label_title"
 
@@ -435,6 +435,57 @@ function This_MOD.toggle_gui(Data)
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+        --- Contenedor para la confirmación
+        Data.GUI.flow_confirm = {}
+        Data.GUI.flow_confirm.type = "flow"
+        Data.GUI.flow_confirm.name = "flow_confirm"
+        Data.GUI.flow_confirm.direction = "horizontal"
+        Data.GUI.flow_confirm = Data.GUI.frame_main.add(Data.GUI.flow_confirm)
+        Data.GUI.flow_confirm.style = Prefix .. "flow_head"
+        Data.GUI.flow_confirm.visible = false
+
+        --- Botón para cancelar los cambios
+        Data.GUI.button_cancel = {}
+        Data.GUI.button_cancel.type = "sprite-button"
+        Data.GUI.button_cancel.name = "button_cancel"
+        Data.GUI.button_cancel.sprite = "utility/close_fat"
+        Data.GUI.button_cancel = Data.GUI.flow_confirm.add(Data.GUI.button_cancel)
+        Data.GUI.button_cancel.style = Prefix .. "button_red"
+
+        --- Indicador para mover la ventana
+        Data.GUI.empty_widget_foot_left = {}
+        Data.GUI.empty_widget_foot_left.type = "empty-widget"
+        Data.GUI.empty_widget_foot_left.name = "empty_widget_foot_left"
+        Data.GUI.empty_widget_foot_left = Data.GUI.flow_confirm.add(Data.GUI.empty_widget_foot_left)
+        Data.GUI.empty_widget_foot_left.drag_target = Data.GUI.frame_main
+        Data.GUI.empty_widget_foot_left.style = Prefix .. "empty_widget"
+
+        --- Mensaje de confirmación
+        Data.GUI.label_title = {}
+        Data.GUI.label_title.type = "label"
+        Data.GUI.label_title.name = "title"
+        Data.GUI.label_title.caption = { "gui.confirmation" }
+        Data.GUI.label_title = Data.GUI.flow_confirm.add(Data.GUI.label_title)
+        Data.GUI.label_title.style = Prefix .. "label_title"
+
+        --- Indicador para mover la ventana
+        Data.GUI.empty_widget_foot_right = {}
+        Data.GUI.empty_widget_foot_right.type = "empty-widget"
+        Data.GUI.empty_widget_foot_right.name = "empty_widget_foot_right"
+        Data.GUI.empty_widget_foot_right = Data.GUI.flow_confirm.add(Data.GUI.empty_widget_foot_right)
+        Data.GUI.empty_widget_foot_right.drag_target = Data.GUI.frame_main
+        Data.GUI.empty_widget_foot_right.style = Prefix .. "empty_widget"
+
+        --- Botón para aplicar los cambios
+        Data.GUI.button_confirm = {}
+        Data.GUI.button_confirm.type = "sprite-button"
+        Data.GUI.button_confirm.name = "button_confirm"
+        Data.GUI.button_confirm.sprite = "utility/check_mark_white"
+        Data.GUI.button_confirm = Data.GUI.flow_confirm.add(Data.GUI.button_confirm)
+        Data.GUI.button_confirm.style = Prefix .. "button_green"
+
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
 
 
 
@@ -448,7 +499,6 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.flow_items.direction = "vertical"
         Data.GUI.flow_items = Data.GUI.frame_main.add(Data.GUI.flow_items)
         Data.GUI.flow_items.style = Prefix .. "flow_vertival_8"
-        Data.GUI.flow_items.visible = false
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -536,57 +586,6 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.button_add.sprite = "utility/check_mark_white"
         Data.GUI.button_add = Data.GUI.flow_4.add(Data.GUI.button_add)
         Data.GUI.button_add.style = Prefix .. "button_green"
-
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-        --- Contenedor para la confirmación
-        Data.GUI.flow_confirm = {}
-        Data.GUI.flow_confirm.type = "flow"
-        Data.GUI.flow_confirm.name = "flow_confirm"
-        Data.GUI.flow_confirm.direction = "horizontal"
-        Data.GUI.flow_confirm = Data.GUI.flow_items.add(Data.GUI.flow_confirm)
-        Data.GUI.flow_confirm.style = Prefix .. "flow_confirm"
-        Data.GUI.flow_confirm.visible = false
-
-        --- Botón para cancelar los cambios
-        Data.GUI.button_cancel = {}
-        Data.GUI.button_cancel.type = "sprite-button"
-        Data.GUI.button_cancel.name = "button_cancel"
-        Data.GUI.button_cancel.sprite = "utility/close_fat"
-        Data.GUI.button_cancel = Data.GUI.flow_confirm.add(Data.GUI.button_cancel)
-        Data.GUI.button_cancel.style = Prefix .. "button_red"
-
-        --- Indicador para mover la ventana
-        Data.GUI.empty_widget_foot_left = {}
-        Data.GUI.empty_widget_foot_left.type = "empty-widget"
-        Data.GUI.empty_widget_foot_left.name = "empty_widget_foot_left"
-        Data.GUI.empty_widget_foot_left = Data.GUI.flow_confirm.add(Data.GUI.empty_widget_foot_left)
-        Data.GUI.empty_widget_foot_left.drag_target = Data.GUI.frame_main
-        Data.GUI.empty_widget_foot_left.style = Prefix .. "empty_widget"
-
-        --- Mensaje de confirmación
-        Data.GUI.label_title = {}
-        Data.GUI.label_title.type = "label"
-        Data.GUI.label_title.name = "title"
-        Data.GUI.label_title.caption = { "gui.confirmation" }
-        Data.GUI.label_title = Data.GUI.flow_confirm.add(Data.GUI.label_title)
-        Data.GUI.label_title.style = Prefix .. "label_title"
-
-        --- Indicador para mover la ventana
-        Data.GUI.empty_widget_foot_right = {}
-        Data.GUI.empty_widget_foot_right.type = "empty-widget"
-        Data.GUI.empty_widget_foot_right.name = "empty_widget_foot_right"
-        Data.GUI.empty_widget_foot_right = Data.GUI.flow_confirm.add(Data.GUI.empty_widget_foot_right)
-        Data.GUI.empty_widget_foot_right.drag_target = Data.GUI.frame_main
-        Data.GUI.empty_widget_foot_right.style = Prefix .. "empty_widget"
-
-        --- Botón para aplicar los cambios
-        Data.GUI.button_confirm = {}
-        Data.GUI.button_confirm.type = "sprite-button"
-        Data.GUI.button_confirm.name = "button_confirm"
-        Data.GUI.button_confirm.sprite = "utility/check_mark_white"
-        Data.GUI.button_confirm = Data.GUI.flow_confirm.add(Data.GUI.button_confirm)
-        Data.GUI.button_confirm.style = Prefix .. "button_green"
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
