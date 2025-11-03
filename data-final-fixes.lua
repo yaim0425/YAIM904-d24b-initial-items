@@ -240,7 +240,7 @@ end
 function This_MOD.key_sequence()
     local Table = {}
     Table.type = "custom-input"
-    Table.name = This_MOD.Prefix .. This_MOD.name
+    Table.name = This_MOD.prefix .. This_MOD.name
     Table.key_sequence = "CONTROL + I"
     data:extend({ Table })
 end
