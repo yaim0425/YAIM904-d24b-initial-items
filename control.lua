@@ -109,12 +109,12 @@ function This_MOD.load_events()
     --     This_MOD.selection_channel(This_MOD.create_data(event))
     -- end)
 
-    -- --- Al hacer clic en algún elemento de la ventana
-    -- script.on_event({
-    --     defines.events.on_gui_click
-    -- }, function(event)
-    --     This_MOD.button_action(This_MOD.create_data(event))
-    -- end)
+    --- Al hacer clic en algún elemento de la ventana
+    script.on_event({
+        defines.events.on_gui_click
+    }, function(event)
+        This_MOD.button_action(This_MOD.create_data(event))
+    end)
 
     -- --- Al seleccionar o deseleccionar un icon
     -- script.on_event({
@@ -651,6 +651,7 @@ function This_MOD.toggle_gui(Data)
     elseif validate_open() then
         Data.GUI.action = This_MOD.action.build
         gui_build()
+        This_MOD.show_my_list(Data)
         Data.GUI.action = This_MOD.action.none
         This_MOD.sound_open(Data)
     end
@@ -720,7 +721,7 @@ function This_MOD.item_select(Data)
     --- Deseleccionar el objeto
     if Data.GUI.Focus then
         Data.GUI.Focus = nil
-        -- This_MOD.Show_MyList(Data)
+        This_MOD.show_my_list(Data)
         Data.GUI[0].elem_value = name
     end
 
@@ -776,7 +777,7 @@ function This_MOD.item_clear(Data)
     --- Dejar la selección del inventario
     if Data.GUI.Focus then
         Data.GUI.Focus = nil
-        -- This_MOD.Show_MyList(Data)
+        This_MOD.show_my_list(Data)
     end
 
     --- Limpiar los valores
@@ -788,6 +789,457 @@ function This_MOD.item_clear(Data)
     Data.GUI.slider.enabled = false
     Data.GUI.button_add.enabled = false
     Data.GUI.textfield.enabled = false
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.button_action(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Variables a usar
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local Flag = false
+    local EventID = 0
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validar el elemento
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    EventID = defines.events.on_gui_click
+    Flag = Data.Event.name == EventID
+    if not Flag then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Acciones 
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Cerrar la ventana
+    Flag = Data.Event.element == Data.GUI.button_exit
+    if Flag then
+        This_MOD.toggle_gui(Data)
+        return
+    end
+
+    --- Mostar donde convertir un string en la lista
+    Flag = Data.Event.element == Data.GUI.button_import
+    if Flag then
+        This_MOD.show_import(Data)
+        return
+    end
+
+    --- Mostrar la lista en un string
+    Flag = Data.Event.element == Data.GUI.button_export
+    if Flag then
+        This_MOD.show_export(Data)
+        return
+    end
+
+    if true then return end
+
+    --- Cancelar en la confirmación
+    Flag = Data.Event.element == Data.GUI.button_cancel
+    if Flag then
+        This_MOD.Show_MyList(Data)
+        Data.GUI.Action = This_MOD.Action.none
+        return
+    end
+
+    --- Se desea aplicar los cambios
+    Flag = Data.GUI.Action == This_MOD.Action.none
+    Flag = Flag or Data.GUI.Action == This_MOD.Action.discard
+    Flag = Flag and Data.Event.element == Data.GUI.button_green
+    if Flag then
+        Data.GUI.Action = This_MOD.Action.apply
+        This_MOD.Show_confirm(Data)
+        return
+    end
+
+    --- Se desea descartar los cambios
+    Flag = Data.GUI.Action == This_MOD.Action.none
+    Flag = Flag or Data.GUI.Action == This_MOD.Action.apply
+    Flag = Flag and Data.Event.element == Data.GUI.button_red
+    if Flag then
+        Data.GUI.Action = This_MOD.Action.discard
+        This_MOD.Show_confirm(Data)
+        return
+    end
+
+    --- Volver de importar y exportar
+    Flag = Data.Event.element == Data.GUI.button_red
+    Flag = Flag and Data.GUI.Action ~= This_MOD.Action.none
+    if Flag then
+        This_MOD.Show_MyList(Data)
+        return
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Restaurar el listado inicial
+    local function Discard()
+        Data.GUI.Action = This_MOD.Action.none
+        local gToGive = util.copy(Data.TheList)
+        Data.gPlayer.MyList = gToGive
+        Data.MyList = gToGive
+        This_MOD.Show_MyList(Data)
+    end
+
+    --- Convertir String en el listado
+    local function Import()
+        --- Guardar la nueva lista objeto
+        local Text = Data.GUI.textbox.text
+        local JSON = helpers.decode_string(Text)
+        if not JSON then
+            This_MOD.Show_import(Data)
+            game.print({ "",
+                "[color=default]",
+                { "controls." .. This_MOD.Prefix .. This_MOD.name },
+                ": [/color]",
+                "[img=utility/character_mining_speed_modifier_icon]" ..
+                "[color=" ..
+                Data.Player.color.r .. "," ..
+                Data.Player.color.g .. "," ..
+                Data.Player.color.b ..
+                "]",
+                Data.Player.name,
+                "[/color] ",
+                {
+                    "failed-to-import-string",
+                    "[color=default]" ..
+                    string.sub(Text, 1, 3) ..
+                    "[/color]" ..
+                    (string.len(Text) > 3 and ".." or "")
+                }
+            })
+            return
+        end
+        local Items = helpers.json_to_table(JSON) or {}
+        if #Items == 0 then
+            This_MOD.Show_import(Data)
+            game.print({ "",
+                "[color=default]",
+                { "controls." .. This_MOD.Prefix .. This_MOD.name },
+                ": [/color]",
+                "[img=utility/character_mining_speed_modifier_icon]" ..
+                "[color=" ..
+                Data.Player.color.r .. "," ..
+                Data.Player.color.g .. "," ..
+                Data.Player.color.b ..
+                "]",
+                Data.Player.name,
+                "[/color] ",
+                {
+                    "failed-to-import-string",
+                    "[color=default]" ..
+                    string.sub(Text, 1, 3) ..
+                    "[/color]" ..
+                    (string.len(Text) > 3 and ".." or "")
+                }
+            })
+            return
+        end
+
+        --- Validar los objetos
+        local Remove = {}
+        for key, items in pairs(Items) do
+            if not prototypes.item[items.name] then
+                table.insert(Remove, 1, key)
+            end
+        end
+        for _, key in pairs(Remove) do
+            table.remove(Items, key)
+        end
+
+        --- Acutualizar la lista
+        Data.gPlayer.MyList = Items
+        Data.MyList = Items
+
+        --- Mostar la nueva lista
+        This_MOD.Show_MyList(Data)
+    end
+
+    --- Entregar los objetos enlistados
+    local function Apply()
+        --- Cerrar la interfaz
+        Data.Event.element = Data.GUI.button_exit
+        This_MOD.toggle_window(Data)
+
+        --- Eliminar los objetos en ceros
+        local Remove = {}
+        for key, MyList in pairs(Data.MyList) do
+            if not MyList.count then
+                table.insert(Remove, 1, key)
+            end
+        end
+        for _, key in pairs(Remove) do
+            table.remove(Data.MyList, key)
+        end
+
+        --- Actualizar la lista
+        Data.gMOD.TheList = Data.MyList
+        Data.TheList = Data.MyList
+
+        local MyList = util.copy(Data.MyList)
+        Data.gPlayer.MyList = MyList
+        Data.MyList = MyList
+
+        --- Informar del cambio
+        game.print({ "",
+            "[color=default]",
+            { "controls." .. This_MOD.Prefix .. This_MOD.name },
+            ": [/color]",
+            {
+                This_MOD.Prefix .. "status-change",
+                {
+                    "",
+                    "[img=utility/character_mining_speed_modifier_icon][color=" ..
+                    Data.Player.color.r .. "," ..
+                    Data.Player.color.g .. "," ..
+                    Data.Player.color.b .. "]",
+                    Data.Player.name,
+                    "[/color]"
+                },
+            }
+        })
+
+        --- Entregar los objetos
+        This_MOD.Insert_items(Data)
+    end
+
+    --- Agregar el nuevo objeto a la lista
+    local function Add_MyList()
+        --- Valores a usar
+        local Text = Data.GUI.textfield.text
+        local Count = tonumber(Text) or 0
+
+        --- Eliminar de la lista
+        if Data.GUI.Found and Count == 0 then
+            local Found = false
+            for _, item in pairs(Data.TheList) do
+                Found = item.name == Data.GUI.Found.name
+                if Found then break end
+            end
+            if not Found then
+                local i = GPrefix.get_key(Data.MyList, Data.GUI.Found)
+                table.remove(Data.MyList, i)
+                Data.GUI.Found = nil
+            end
+        end
+
+        --- Actualizar la cantidad
+        if Data.GUI.Found then
+            Data.GUI.Found.count = Count > 0 and Count or nil
+        end
+
+        --- Agregar un nuevo objeto
+        if not Data.GUI.Found and Count > 0 then
+            table.insert(Data.MyList, {
+                name = Data.GUI[0].elem_value,
+                count = Count > 0 and Count or nil,
+            })
+
+            --- Ordenar MyList
+            local Level_1 = {}
+            for _, item in pairs(Data.MyList) do
+                --- Variables a usar
+                local Item = prototypes.item[item.name]
+                local Subgroup = Item.subgroup
+                local Group = Item.subgroup.group
+
+                --- Crear la jerarquia
+                local Level_2 = Level_1[Group.order] or {}
+                Level_1[Group.order] = Level_2
+
+                local Level_3 = Level_2[Subgroup.order] or {}
+                Level_2[Subgroup.order] = Level_3
+
+                Level_3[Item.order] = item
+            end
+
+            --- Variable de salida
+            local result = {}
+
+            -- Función auxiliar para ordenar keys de una tabla
+            local function getSortedKeys(level)
+                local keys = {}
+                for key in pairs(level) do
+                    table.insert(keys, key)
+                end
+                table.sort(keys)
+                return keys
+            end
+
+            -- Recorremos en orden cada nivel
+            local Keys_1 = getSortedKeys(Level_1)
+            for _, Key_1 in ipairs(Keys_1) do
+                local Level_2 = Level_1[Key_1]
+                local Keys_2 = getSortedKeys(Level_2)
+                for _, Key_2 in ipairs(Keys_2) do
+                    local Level_3 = Level_2[Key_2]
+                    local Keys_3 = getSortedKeys(Level_3)
+                    for _, Key_3 in ipairs(Keys_3) do
+                        table.insert(result, Level_3[Key_3])
+                    end
+                end
+            end
+
+            --- Actualizar la lista
+            Data.gPlayer.MyList = result
+            Data.MyList = result
+        end
+
+        --- Establecer el valor
+        This_MOD.Show_MyList(Data)
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Agregar un objeto a la lista
+    Flag = Data.Event.element == Data.GUI.button_add
+    if Flag then
+        Add_MyList()
+        return
+    end
+
+    --- Convertir String en el listado
+    Flag = Data.Event.element == Data.GUI.button_green
+    Flag = Flag and Data.GUI.Action == This_MOD.Action.import
+    if Flag then
+        Import()
+        return
+    end
+
+    --- Guardar los cambios
+    --- Entregar los objetos en la lista
+    Flag = Data.Event.element == Data.GUI.button_confirm
+    Flag = Flag and Data.GUI.Action == This_MOD.Action.apply
+    if Flag then
+        if Data.gMOD.Block_implication then
+            Data.Player.print({ "gui-selector.feature-disabled" })
+        else
+            Data.gMOD.Block_implication = true
+            for _, player in pairs(game.connected_players) do
+                This_MOD.Insert_items(This_MOD.Create_data({ player = player }))
+            end
+            Apply()
+            Data.gMOD.Block_implication = nil
+        end
+        return
+    end
+
+    --- Restaurar la lista inicial
+    Flag = Data.Event.element == Data.GUI.button_confirm
+    Flag = Flag and Data.GUI.Action == This_MOD.Action.discard
+    if Flag then
+        Discard()
+        return
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Vaidar un botón en la tabla
+    local i = tonumber(Data.Event.element.name) or 0
+    if i == 0 or i > #Data.MyList then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Seleccionar objeto desde la tabla
+    local function Select()
+        --- Restaurar cuadro selección
+        if Data.GUI.Action ~= This_MOD.Action.none then
+            Data.GUI.Action = This_MOD.Action.none
+            This_MOD.Show_MyList(Data)
+        end
+
+        --- Seleccionar lo seleccionado
+        Flag = Data.GUI.Found
+        Flag = Flag and Data.GUI.Found.name == Data.MyList[i].name
+
+        --- Liberar la selección
+        if Flag then
+            Data.GUI[0].elem_value = nil
+            This_MOD.Item_clear(Data)
+        end
+
+        --- Actual seleccionado
+        if not Flag then
+            Data.GUI[0].elem_value = Data.MyList[i].name
+            This_MOD.Item_select(Data)
+        end
+    end
+
+    --- Eliminar objeto desde la tabla
+    local function Remove()
+        --- Guardar el objeto selecionado
+        local name = Data.GUI[0].elem_value
+
+        --- Buscar en el listado a entregar
+        local Found = false
+        for _, item in pairs(Data.TheList) do
+            Found = item.name == Data.MyList[i].name
+            if Found then break end
+        end
+
+        --- "Remover objeto"
+        if Found then
+            --- Remover de la lista
+            Data.MyList[i].count = nil
+        else
+            --- Remover el objeto de la tabla
+            table.remove(Data.MyList, i)
+        end
+
+        --- Mostrar la nueva lista
+        This_MOD.Show_MyList(Data)
+
+        --- Restaurar objeto selecionado
+        if name then
+            Data.GUI[0].elem_value = name
+            This_MOD.Item_select(Data)
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Seleccionar objeto desde la tabla
+    EventID = defines.mouse_button_type.left
+    Flag = Data.Event.button == EventID
+    if Flag then
+        Select()
+        return
+    end
+
+    --- Borrar objeto desde la tabla
+    EventID = defines.mouse_button_type.right
+    Flag = Data.Event.button == EventID
+    if Flag then
+        Remove()
+        return
+    end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -842,6 +1294,223 @@ function This_MOD.create_data(event)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     return Data
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.show_my_list(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validar si hay diferencia
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    local MyList = helpers.encode_string(helpers.table_to_json(Data.My_list))
+    local gToGive = helpers.encode_string(helpers.table_to_json(Data.The_list))
+    local Diff = MyList ~= gToGive
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Botones
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.button_import.enabled = true
+    Data.GUI.button_export.enabled = #Data.My_list > 0
+    Data.GUI.button_red.enabled = Diff
+    Data.GUI.button_green.enabled = Diff
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Actualizar la tabla
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Limpiar la tabla
+    Data.GUI.table.clear()
+
+    --- Recorrer los objetos
+    for i, My_item in pairs(Data.My_list) do
+        --- Agregar los objetos
+        Data.GUI[i] = {}
+        Data.GUI[i].type = "sprite-button"
+        Data.GUI[i].name = tostring(i)
+        Data.GUI[i].tags = My_item
+        Data.GUI[i].sprite = "item/" .. My_item.name
+        Data.GUI[i].number = My_item.count
+        Data.GUI[i] = Data.GUI.table.add(Data.GUI[i])
+
+        --- Color del fondo
+        Data.GUI[i].style = (function()
+            for _, The_item in pairs(Data.The_list) do
+                if My_item.name == The_item.name then
+                    if not My_item.count then
+                        return This_MOD.slot.deleted
+                    elseif My_item.count == The_item.count then
+                        return This_MOD.slot.old
+                    end
+                end
+            end
+            return This_MOD.slot.new
+        end)()
+    end
+
+    --- Rellenar la tabla
+    local iList = #Data.My_list
+    local Max = 40
+    local Left = iList % 10
+    if Left > 0 and iList > Max then Max = iList + (10 - Left) end
+    for i = iList + 1, Max, 1 do
+        Data.GUI[i] = {}
+        Data.GUI[i].type = "sprite-button"
+        Data.GUI[i].name = tostring(i)
+        Data.GUI[i] = Data.GUI.table.add(Data.GUI[i])
+        Data.GUI[i].style = This_MOD.slot.empty
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Preparar la selección
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.frame_select.visible = true
+    Data.GUI[0].elem_value = nil
+    This_MOD.item_clear(Data)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Inicializar los valores
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.button_green.sprite = "utility/play"
+    Data.GUI.flow_items.visible = true
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.show_import(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Botones
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.button_import.enabled = false
+    Data.GUI.button_export.enabled = #Data.My_list > 0
+    Data.GUI.button_red.enabled = true
+    Data.GUI.button_green.enabled = false
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Inicializar los valores
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.flow_items.visible = false
+    Data.GUI.textbox.text =
+    "eNqNlMtuAjEMRf9l1kSCvqTyK1UXmRl3sEji1HFKq4p/rwFREqR5rH1yfW3HfvttgvXQbBthi8Ekodismo5ykGb7sj6u/gFHAybBzjC1JDfo4bmkVIDtAKbbQSqgxwpi+MwaBr7HHtYlFumgSDqgdLsbUylZIa+WWvLtjXitDJGzbKIN4IymxeghFBmfqhJt0oSSmaFCSuZA1EO4N16ZQqZpQEtXN9PEpY1iw34E0YGFFInFtOAKnU1l98MmMctQ+I4MKS2kc+iBB9ZQf8dVLtvs9gaD9lXHPcKcPS7Uu5pciKfoUGYyzzDXjDNYmzno55kpdSbsKAxmZ7W2flHTZpjkrdNf76AT1i2J5GCE9NBj9ovQFodFXMptEitIYQSIGGHsd51iRshcJjwmkH0cCekxc2Pap5hJOATrJl7rep4P4hTnqCNPgl9lD4p4Z3kgc7BD1YNyiC5jPwVYFnQO+GcK0jRFreWJqK7HptoL1P0RLiU3x/c/lI0EwQ=="
+    Data.GUI.textbox.text = ""
+    Data.GUI.textbox.read_only = false
+    Data.GUI.button_green.sprite = "utility/play"
+    Data.GUI.flow_IO.visible = true
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Acción en ejecucción
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.Action = This_MOD.action.import
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Enfocar
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.textbox.focus()
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.show_export(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Botones
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.button_import.enabled = true
+    Data.GUI.button_export.enabled = false
+    Data.GUI.button_red.enabled = true
+    Data.GUI.button_green.enabled = false
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Inicializar los valores
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.flow_items.visible = false
+    Data.GUI.textbox.text = ""
+    Data.GUI.textbox.read_only = true
+    Data.GUI.button_green.sprite = nil
+    Data.GUI.flow_IO.visible = true
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Acción en ejecucción
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.Action = This_MOD.action.export
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Limipiar y enfocar
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    Data.GUI.textbox.text = helpers.table_to_json(Data.My_list)
+    Data.GUI.textbox.text = helpers.encode_string(Data.GUI.textbox.text)
+    Data.GUI.textbox.select_all()
+    Data.GUI.textbox.focus()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
