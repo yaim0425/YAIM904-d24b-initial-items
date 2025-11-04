@@ -65,6 +65,12 @@ function This_MOD.reference_values()
     This_MOD.action.discard = 4
     This_MOD.action.build = 5
 
+    --- Minimo de filas a mostrar
+    This_MOD.slot_row_min = 5
+
+    --- Simbolos a mostrar a 
+    This_MOD.string_length = 10
+
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
@@ -431,7 +437,7 @@ function This_MOD.toggle_gui(Data)
         Data.GUI.table.style = Prefix .. "table"
 
         --- Imagen a mostrar
-        for i = 1, 50, 1 do
+        for i = 1, 10 * This_MOD.slot_row_min, 1 do
             Data.GUI[i] = {}
             Data.GUI[i].type = "sprite-button"
             Data.GUI[i].name = tostring(i)
@@ -798,25 +804,12 @@ function This_MOD.button_action(Data)
 
         if not JSON then
             This_MOD.show_import(Data)
-            game.print({ "",
-                "[color=default]",
-                { "description.initial-items" },
-                ": [/color]",
-                "[img=utility/character_mining_speed_modifier_icon]" ..
-                "[color=" ..
-                Data.Player.color.r .. "," ..
-                Data.Player.color.g .. "," ..
-                Data.Player.color.b ..
-                "]",
-                Data.Player.name,
-                "[/color] ",
-                {
-                    "failed-to-import-string",
-                    "[color=default]" ..
-                    string.sub(Text, 1, 3) ..
-                    "[/color]" ..
-                    (string.len(Text) > 3 and ".." or "")
-                }
+            This_MOD.msg_global(Data, {
+                "failed-to-import-string",
+                "[color=default]" ..
+                string.sub(Text, 1, This_MOD.string_length) ..
+                "[/color]" ..
+                (string.len(Text) > This_MOD.string_length and ".." or "")
             })
             return
         end
@@ -824,25 +817,12 @@ function This_MOD.button_action(Data)
         local Items = helpers.json_to_table(JSON) or {}
         if #Items == 0 then
             This_MOD.show_import(Data)
-            game.print({ "",
-                "[color=default]",
-                { "description.initial-items" },
-                ": [/color]",
-                "[img=utility/character_mining_speed_modifier_icon]" ..
-                "[color=" ..
-                Data.Player.color.r .. "," ..
-                Data.Player.color.g .. "," ..
-                Data.Player.color.b ..
-                "]",
-                Data.Player.name,
-                "[/color] ",
-                {
-                    "failed-to-import-string",
-                    "[color=default]" ..
-                    string.sub(Text, 1, 3) ..
-                    "[/color]" ..
-                    (string.len(Text) > 3 and ".." or "")
-                }
+            This_MOD.msg_global(Data, {
+                "failed-to-import-string",
+                "[color=default]" ..
+                string.sub(Text, 1, This_MOD.string_length) ..
+                "[/color]" ..
+                (string.len(Text) > This_MOD.string_length and ".." or "")
             })
             return
         end
@@ -898,30 +878,14 @@ function This_MOD.button_action(Data)
         Data.MyList = MyList
 
         --- Informar del cambio
-        game.print({ "",
-            "[color=default]",
-            { "description.initial-items" },
-            ": [/color]",
-            {
-                This_MOD.prefix .. "status-change",
-                {
-                    "",
-                    "[img=utility/character_mining_speed_modifier_icon][color=" ..
-                    Data.Player.color.r .. "," ..
-                    Data.Player.color.g .. "," ..
-                    Data.Player.color.b .. "]",
-                    Data.Player.name,
-                    "[/color]"
-                },
-            }
-        })
+        This_MOD.msg_player(Data, { "gui-migrated-content.changed-item" })
 
         --- Entregar los objetos
         This_MOD.insert_items(Data)
     end
 
     --- Agregar el nuevo objeto a la lista
-    local function Add_in_MyList()
+    local function Add_MyList()
         --- Valores a usar
         local Text = Data.GUI.textfield.text
         local Count = tonumber(Text) or 0
@@ -1011,7 +975,7 @@ function This_MOD.button_action(Data)
     --- Agregar un objeto a la lista
     Flag = Data.Event.element == Data.GUI.button_add
     if Flag then
-        Add_in_MyList()
+        Add_MyList()
         return
     end
 
@@ -1029,7 +993,7 @@ function This_MOD.button_action(Data)
     Flag = Flag and Data.GUI.Action == This_MOD.action.apply
     if Flag then
         if Data.gMOD.Block_implication then
-            Data.Player.print({ "gui-selector.feature-disabled" })
+            This_MOD.msg_player(Data, { "gui-selector.feature-disabled" })
         else
             Data.gMOD.Block_implication = true
             for _, player in pairs(game.connected_players) do
@@ -1230,12 +1194,7 @@ function This_MOD.insert_items(Data)
     end
 
     if Data.gPlayer.Full_inventory then
-        Data.Player.print({ "",
-            "[color=default]",
-            { "description.initial-items" },
-            ": [/color]",
-            { "inventory-full-message.main" }
-        })
+        This_MOD.msg_player(Data, { "inventory-full-message.main" })
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -1360,7 +1319,7 @@ function This_MOD.show_MyList(Data)
 
     --- Rellenar la tabla
     local iList = #Data.MyList
-    local Max = 50
+    local Max = 10 * This_MOD.slot_row_min
     local Left = iList % 10
     if Left > 0 and iList > Max then Max = iList + (10 - Left) end
     for i = iList + 1, Max, 1 do
@@ -1566,6 +1525,41 @@ function This_MOD.gameplay_mode(Data)
     return true
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+---------------------------------------------------------------------------------------------------
+
+function This_MOD.get_msg_format(Data)
+    return { "",
+        "[color=default]",
+        { "description.initial-items" },
+        ":[/color]",
+
+        " ",
+
+        "[img=utility/character_mining_speed_modifier_icon]" ..
+        "[color=" ..
+        Data.Player.color.r .. "," ..
+        Data.Player.color.g .. "," ..
+        Data.Player.color.b ..
+        "]",
+        Data.Player.name,
+        "[/color]",
+
+        " "
+    }
+end
+
+function This_MOD.msg_player(Data, msg)
+    local Msg = This_MOD.get_msg_format(Data)
+    table.insert(Msg, msg)
+    Data.Player.print(Msg)
+end
+
+function This_MOD.msg_global(Data, msg)
+    local Msg = This_MOD.get_msg_format(Data)
+    table.insert(Msg, msg)
+    game.print(Msg)
 end
 
 ---------------------------------------------------------------------------------------------------
