@@ -179,6 +179,8 @@ function This_MOD.toggle_gui(Data)
         --- Validación
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
+        if not Data.Player.admin then return false end
+        if not This_MOD.gameplay_mode(Data) then return false end
         if not Data.Event.input_name then return false end
         if Data.Event.input_name ~= This_MOD.key_sequence then return false end
 
