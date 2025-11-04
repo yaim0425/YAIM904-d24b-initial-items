@@ -151,7 +151,6 @@ function This_MOD.load_styles()
         type = "table_style",
         horizontal_spacing = 0,
         vertical_spacing = 0,
-        padding = 10
     }
 
     Styles[Prefix .. "flow_select"] = {
@@ -189,6 +188,7 @@ function This_MOD.key_sequence()
     local Table = {}
     Table.type = "custom-input"
     Table.name = This_MOD.prefix .. This_MOD.name
+    Table.localised_name = { "description.initial-items" }
     Table.key_sequence = "CONTROL + I"
     data:extend({ Table })
 end
