@@ -68,7 +68,7 @@ function This_MOD.reference_values()
     --- Minimo de filas a mostrar
     This_MOD.slot_row_min = 5
 
-    --- Simbolos a mostrar a 
+    --- Simbolos a mostrar a
     This_MOD.string_length = 10
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -88,6 +88,13 @@ function This_MOD.load_events()
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Acciones comunes
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Abrir el inventario
+    script.on_event({
+        defines.events.on_gui_opened
+    }, function(event)
+        This_MOD.open_inventory(This_MOD.create_data(event))
+    end)
 
     --- Abrir o cerrar la interfaz
     script.on_event({
@@ -879,9 +886,6 @@ function This_MOD.button_action(Data)
 
         --- Informar del cambio
         This_MOD.print_player(Data, { "gui-migrated-content.changed-item" })
-
-        --- Entregar los objetos
-        This_MOD.insert_items(Data)
     end
 
     --- Agregar el nuevo objeto a la lista
@@ -1104,28 +1108,12 @@ function This_MOD.button_action(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
-function This_MOD.insert_items(Data)
+function This_MOD.open_inventory(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Establecer los objetos a entregar y su cantidad
+    --- Validación
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    for _, TheItem in pairs(Data.TheList) do
-        --- Validar si el objeto ha sido entregado con anterioridad
-        local Item = GMOD.get_tables(Data.Received, "name", TheItem.name)
-        Item = Item and Item[1] or {}
-
-        --- Se incremento la cantidad
-        if Item.name and TheItem.count > Item.count then
-            Item.count = TheItem.count
-        end
-
-        --- Primera vez en entregar el objeto
-        if not Item.name then
-            Item = GMOD.copy(TheItem)
-            Item.gived = 0
-            table.insert(Data.Received, Item)
-        end
-    end
+    if Data.Event.gui_type ~= defines.gui_type.controller then return end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -1134,68 +1122,10 @@ function This_MOD.insert_items(Data)
 
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Modo de juego
+    --- Agregar los objetos a los jugadores
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    if not This_MOD.gameplay_mode(Data) then return end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-
-
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Agregar los objetos
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    --- Indicador para el inventory lleno
-    Data.gPlayer.Full_inventory = false
-
-    --- El jugador no tiene un cuerpo
-    if not Data.Player.character then
-        for _, Item in pairs(Data.Received) do
-            local count = Item.count - Item.gived
-            if count > 0 then
-                local item = { name = Item.name, count = count }
-                Item.gived = Item.gived + Data.Player.insert(item)
-                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
-            end
-        end
-    end
-
-    --- El jugador tiene un cuerpo
-    if Data.Player.character then
-        local Inventory = Data.Player.character
-        local IDInvertory = defines.inventory.character_main
-        Inventory = Inventory.get_inventory(IDInvertory)
-        for _, Item in pairs(Data.Received) do
-            local count = Item.count - Item.gived
-            if count > 0 then
-                local item = { name = Item.name, count = count }
-                Item.gived = Item.gived + Inventory.insert(item)
-                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
-            end
-        end
-    end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-
-
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Informar del inventario
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    if not Data.gPlayer.Full_inventory then
-        Data.gPlayer.Full_inventory = nil
-    end
-
-    if Data.gPlayer.Full_inventory then
-        This_MOD.print_player(Data, { "inventory-full-message.main" })
-    end
+    This_MOD.insert_items(Data)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -1523,6 +1453,102 @@ function This_MOD.gameplay_mode(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     return true
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
+function This_MOD.insert_items(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Establecer los objetos a entregar y su cantidad
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    for _, TheItem in pairs(Data.TheList) do
+        --- Validar si el objeto ha sido entregado con anterioridad
+        local Item = GMOD.get_tables(Data.Received, "name", TheItem.name)
+        Item = Item and Item[1] or {}
+
+        --- Se incremento la cantidad
+        if Item.name and TheItem.count > Item.count then
+            Item.count = TheItem.count
+        end
+
+        --- Primera vez en entregar el objeto
+        if not Item.name then
+            Item = GMOD.copy(TheItem)
+            Item.gived = 0
+            table.insert(Data.Received, Item)
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Modo de juego
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not This_MOD.gameplay_mode(Data) then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Agregar los objetos
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    --- Indicador para el inventory lleno
+    Data.gPlayer.Full_inventory = false
+
+    --- El jugador no tiene un cuerpo
+    if not Data.Player.character then
+        for _, Item in pairs(Data.Received) do
+            local count = Item.count - Item.gived
+            if count > 0 then
+                local item = { name = Item.name, count = count }
+                Item.gived = Item.gived + Data.Player.insert(item)
+                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
+            end
+        end
+    end
+
+    --- El jugador tiene un cuerpo
+    if Data.Player.character then
+        local Inventory = Data.Player.character
+        local IDInvertory = defines.inventory.character_main
+        Inventory = Inventory.get_inventory(IDInvertory)
+        for _, Item in pairs(Data.Received) do
+            local count = Item.count - Item.gived
+            if count > 0 then
+                local item = { name = Item.name, count = count }
+                Item.gived = Item.gived + Inventory.insert(item)
+                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
+            end
+        end
+    end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Informar del inventario
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if not Data.gPlayer.Full_inventory then
+        Data.gPlayer.Full_inventory = nil
+    end
+
+    if Data.gPlayer.Full_inventory then
+        This_MOD.print_player(Data, { "inventory-full-message.main" })
+    end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
