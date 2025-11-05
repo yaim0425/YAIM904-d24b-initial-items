@@ -1537,7 +1537,7 @@ function This_MOD.get_format(Data, msg)
 
         " ",
 
-        "[img=utility/character_mining_speed_modifier_icon]" ..
+        "[img=entity/character]" ..
         "[color=" ..
         Data.Player.color.r .. "," ..
         Data.Player.color.g .. "," ..
