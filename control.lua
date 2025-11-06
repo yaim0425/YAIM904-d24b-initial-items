@@ -886,6 +886,16 @@ function This_MOD.button_action(Data)
 
         --- Informar del cambio
         This_MOD.print_player(Data, { "gui-migrated-content.changed-item" })
+
+        --- Permitir entrega a jugadores antiguos
+        for _, gPlayer in pairs(Data.gPlayers) do
+            gPlayer.ignore = nil
+        end
+
+        --- Entregar a los jugadores conectados
+        for _, player in pairs(game.connected_players) do
+            This_MOD.insert_items(This_MOD.create_data({ Player = player }))
+        end
     end
 
     --- Agregar el nuevo objeto a la lista
@@ -996,15 +1006,12 @@ function This_MOD.button_action(Data)
     Flag = Data.Event.element == Data.GUI.button_confirm
     Flag = Flag and Data.GUI.Action == This_MOD.action.apply
     if Flag then
-        if Data.gMOD.Block_implication then
+        if Data.gMOD.block then
             This_MOD.print_player(Data, { "gui-selector.feature-disabled" })
         else
-            Data.gMOD.Block_implication = true
-            for _, player in pairs(game.connected_players) do
-                This_MOD.insert_items(This_MOD.create_data({ Player = player }))
-            end
+            Data.gMOD.block = true
             Apply()
-            Data.gMOD.Block_implication = nil
+            Data.gMOD.block = nil
         end
         return
     end
@@ -1459,6 +1466,18 @@ end
 
 function This_MOD.insert_items(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if Data.Received.ignore then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Establecer los objetos a entregar y su cantidad
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -1544,6 +1563,7 @@ function This_MOD.insert_items(Data)
 
     if not Data.gPlayer.Full_inventory then
         Data.gPlayer.Full_inventory = nil
+        Data.Received.ignore = true
     end
 
     if Data.gPlayer.Full_inventory then
