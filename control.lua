@@ -688,6 +688,28 @@ function This_MOD.item_clear(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
 
+function This_MOD.open_inventory(Data)
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if Data.Event.gui_type ~= defines.gui_type.controller then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Agregar los objetos a los jugadores
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    This_MOD.insert_items(Data)
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+end
+
 function This_MOD.button_action(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Variables a usar
@@ -886,6 +908,16 @@ function This_MOD.button_action(Data)
 
         --- Informar del cambio
         This_MOD.print_player(Data, { "gui-migrated-content.changed-item" })
+
+        --- Permitir entrega a jugadores antiguos
+        for _, gPlayer in pairs(Data.gPlayers) do
+            gPlayer.Received.ignore = nil
+        end
+
+        --- Entregar a los jugadores conectados
+        for _, player in pairs(game.connected_players) do
+            This_MOD.insert_items(This_MOD.create_data({ Player = player }))
+        end
     end
 
     --- Agregar el nuevo objeto a la lista
@@ -996,15 +1028,12 @@ function This_MOD.button_action(Data)
     Flag = Data.Event.element == Data.GUI.button_confirm
     Flag = Flag and Data.GUI.Action == This_MOD.action.apply
     if Flag then
-        if Data.gMOD.Block_implication then
+        if Data.gMOD.block then
             This_MOD.print_player(Data, { "gui-selector.feature-disabled" })
         else
-            Data.gMOD.Block_implication = true
-            for _, player in pairs(game.connected_players) do
-                This_MOD.insert_items(This_MOD.create_data({ Player = player }))
-            end
+            Data.gMOD.block = true
             Apply()
-            Data.gMOD.Block_implication = nil
+            Data.gMOD.block = nil
         end
         return
     end
@@ -1104,28 +1133,6 @@ function This_MOD.button_action(Data)
         Remove()
         return
     end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-end
-
-function This_MOD.open_inventory(Data)
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Validación
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    if Data.Event.gui_type ~= defines.gui_type.controller then return end
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-
-
-
-
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    --- Agregar los objetos a los jugadores
-    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-
-    This_MOD.insert_items(Data)
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -1459,6 +1466,18 @@ end
 
 function This_MOD.insert_items(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+    --- Validación
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+    if Data.Received.ignore then return end
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
+
+
+    --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
     --- Establecer los objetos a entregar y su cantidad
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -1503,16 +1522,16 @@ function This_MOD.insert_items(Data)
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     --- Indicador para el inventory lleno
-    Data.gPlayer.Full_inventory = false
+    Data.gPlayer.full_inventory = false
 
     --- El jugador no tiene un cuerpo
     if not Data.Player.character then
-        for _, Item in pairs(Data.Received) do
-            local count = Item.count - Item.gived
-            if count > 0 then
-                local item = { name = Item.name, count = count }
-                Item.gived = Item.gived + Data.Player.insert(item)
-                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
+        for _, item in pairs(Data.Received) do
+            local Count = item.count - item.gived
+            if Count > 0 then
+                local Item = { name = item.name, count = Count }
+                item.gived = item.gived + Data.Player.insert(Item)
+                Data.gPlayer.full_inventory = Data.gPlayer.full_inventory or item.gived ~= item.count
             end
         end
     end
@@ -1522,12 +1541,12 @@ function This_MOD.insert_items(Data)
         local Inventory = Data.Player.character
         local IDInvertory = defines.inventory.character_main
         Inventory = Inventory.get_inventory(IDInvertory)
-        for _, Item in pairs(Data.Received) do
-            local count = Item.count - Item.gived
-            if count > 0 then
-                local item = { name = Item.name, count = count }
-                Item.gived = Item.gived + Inventory.insert(item)
-                Data.gPlayer.Full_inventory = Data.gPlayer.Full_inventory or Item.gived ~= Item.count
+        for _, item in pairs(Data.Received) do
+            local Count = item.count - item.gived
+            if Count > 0 then
+                local Item = { name = item.name, count = Count }
+                item.gived = item.gived + Inventory.insert(Item)
+                Data.gPlayer.full_inventory = Data.gPlayer.full_inventory or item.gived ~= item.count
             end
         end
     end
@@ -1542,15 +1561,19 @@ function This_MOD.insert_items(Data)
     --- Informar del inventario
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    if not Data.gPlayer.Full_inventory then
-        Data.gPlayer.Full_inventory = nil
+    if not Data.gPlayer.full_inventory then
+        Data.gPlayer.full_inventory = nil
+        Data.Received.ignore = true
     end
 
-    if Data.gPlayer.Full_inventory then
+    if Data.gPlayer.full_inventory then
         This_MOD.print_player(Data, { "inventory-full-message.main" })
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+
+
 end
 
 ---------------------------------------------------------------------------------------------------
