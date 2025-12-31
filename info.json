@@ -1,12 +1,12 @@
 {
-  "name": "YAIM0425-d24b-initial-items",
+  "name": "YAIM904-d24b-initial-items",
   "version": "0.0.1",
-  "title": "YAIM0425 d24b Initial items",
-  "author": "YAIM0425",
+  "title": "YAIM904 d24b Initial items",
+  "author": "YAIM904",
   "factorio_version": "2.0",
   "description": "Allows you to create a list of items that all players will receive when player login. [[I accept suggestions]]",
-  "homepage": "https://github.com/yaim0425/YAIM0425-d24b-initial-items",
+  "homepage": "https://github.com/yaim0425/YAIM904-d24b-initial-items",
   "dependencies": [
-    "YAIM0425-d00b-core"
+    "YAIM904-d00b-core"
   ]
 }

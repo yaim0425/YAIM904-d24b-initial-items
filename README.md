@@ -1,8 +1,8 @@
-# YAIM0425 d24b – Initial Items 🎒
+# YAIM904 d24b – Initial Items 🎒
 
 ## 📦 Description
 
-**YAIM0425 d24b – Initial Items** allows server owners and players to define a list of items that **every player receives automatically when they join the game**.
+**YAIM904 d24b – Initial Items** allows server owners and players to define a list of items that **every player receives automatically when they join the game**.
 
 This MOD is designed to simplify early gameplay, testing scenarios, multiplayer starts, or custom progression setups by ensuring all players begin with predefined resources.
 
@@ -53,11 +53,11 @@ Non-admin players can receive items, but **cannot change the configuration**.
 ## 🔗 Repository
 
 **MOD**
-[YAIM0425 d24b Initial items](https://github.com/yaim0425/YAIM0425-d24b-initial-items)
+[YAIM904 d24b Initial items](https://github.com/yaim0425/YAIM904-d24b-initial-items)
 
 **Required**
 
-[YAIM0425 d00b Core](https://github.com/yaim0425/YAIM0425-d00b-core)
+[YAIM904 d00b Core](https://github.com/yaim0425/YAIM904-d00b-core)
 
 ---
 
@@ -69,12 +69,12 @@ Suggestions, ideas, and balance feedback are welcome on the GitHub repository.
 
 ## 🖼️ Screenshots
 
-![Screenshot 1](https://github.com/yaim0425/YAIM0425-d24b-initial-items/raw/code/screenshot/(1).png)
+![Screenshot 1](https://github.com/yaim0425/YAIM904-d24b-initial-items/raw/code/screenshot/(1).png)
 
-![Screenshot 2](https://github.com/yaim0425/YAIM0425-d24b-initial-items/raw/code/screenshot/(2).png)
+![Screenshot 2](https://github.com/yaim0425/YAIM904-d24b-initial-items/raw/code/screenshot/(2).png)
 
-![Screenshot 3](https://github.com/yaim0425/YAIM0425-d24b-initial-items/raw/code/screenshot/(3).png)
+![Screenshot 3](https://github.com/yaim0425/YAIM904-d24b-initial-items/raw/code/screenshot/(3).png)
 
-![Screenshot 4](https://github.com/yaim0425/YAIM0425-d24b-initial-items/raw/code/screenshot/(4).png)
+![Screenshot 4](https://github.com/yaim0425/YAIM904-d24b-initial-items/raw/code/screenshot/(4).png)
 
-![Screenshot 5](https://github.com/yaim0425/YAIM0425-d24b-initial-items/raw/code/screenshot/(5).png)
+![Screenshot 5](https://github.com/yaim0425/YAIM904-d24b-initial-items/raw/code/screenshot/(5).png)
