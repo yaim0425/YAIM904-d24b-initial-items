@@ -1,5 +1,7 @@
 # YAIM904 d24b – Initial Items 🎒
 
+---
+
 ## 📦 Description
 
 **YAIM904 d24b – Initial Items** allows server owners and players to define a list of items that **every player receives automatically when they join the game**.
@@ -63,7 +65,7 @@ Non-admin players can receive items, but **cannot change the configuration**.
 
 ## ❤️ Support
 
-Suggestions, ideas, and balance feedback are welcome on the GitHub repository.
+Suggestions, ideas and balance feedback are welcome on the GitHub repository.
 
 ---
 
